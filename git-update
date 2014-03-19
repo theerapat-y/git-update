@@ -89,7 +89,7 @@ fi
 
 [ -z "$b" ] && b=develop
 [ -z "$fall" ] && fall=develop
-[ -z "$WORKPATH" ] && WORKPATH=$DIR
+[ -z "$WORKPATH" ] && WORKPATH=$DIR/..
 [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] Option => reset=$r prune=$p compare=$c branch=$b workpath=$WORKPATH fallback=$fall" | tee -a $LOGFILE
 
 # reset option confirmation
@@ -202,4 +202,4 @@ do
     [ -z "$r" ] && stash_pop $REPO
 done
 
-echo "$(date +%H:%M:%S) : [DEBUG] Finished" | tee -a $LOGFILEs`
+echo "$(date +%H:%M:%S) : [DEBUG] Finished" | tee -a $LOGFILE
