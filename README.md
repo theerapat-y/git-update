@@ -15,8 +15,7 @@ to run ./git-update [-rvcpb:P:f:][--branch: --fall:] [branch] [--path:] [workpat
 * -P, --path      Set base working path
 * -F, --fall      Fallback branch, default is develop
  
- 
-    ./git-update -vb SOK-308 -F develop
+`./git-update -vb feature-01 -F develop`
  
 log file is store in /tmp/git-update_DATETIME.log
 **chmod is required to make git-update executable**
