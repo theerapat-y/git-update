@@ -1,0 +1,205 @@
+#!/bin/bash
+# 
+# git-update script
+# version 0.74
+# by Theerapat Yimsirikul
+# 
+# A basic script to update git for lazy people
+# git-update [-rvcpb:P:f:][--branch: --fall:] [branch] [--path:] [workpath]
+# 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+dt=$(date +%Y%m%d+%H%M%S)
+LOGFILE=/tmp/git-update_$dt.log
+echo $LOGFILE
+echo "$(date +%H:%M:%S) : [DEBUG] Starting git-update" | tee -a $LOGFILE
+
+
+# declare -a FAIL_REPO SUCCESS_REPO DEV_REPO
+declare r v c p b WORKPATH fall
+
+# getopts for Mac OS X without long options
+set -- $(getopt rvcpb:P:F: $*)
+while [ $# -gt 0 ]
+do
+    case "$1" in
+    (-r) r=1;;
+    (-v) v=1;;
+    (-c) c=1;;
+    (-p) p=1;;
+    (-b) b="$2"; shift;;
+    (-P) WORKPATH="$2"; shift;;
+    (-F) fall="$2"; shift;;
+    (--) shift; break;;
+    (-*) echo "$0: error - unrecognized option '$1'" 1>&2; exit 1;;
+    (*)  break;;
+    esac
+    shift
+done
+# end getopts
+
+# getopt(1) for Linux with long options
+# TEMP=`getopt -o rvcpb:P:F: --long reset,verbose,compare,prune,branch:,path:,fall: -n 'git-update' -- "$@"`
+# eval set -- "$TEMP"
+# while [ $# -gt 0 ]; do
+#     case "$1" in
+#             -r|--reset)     r=1 ; shift ;;
+#             -v|--verbose)   v=1 ; shift ;;
+#             -c|--compare)   c=1 ; shift ;;
+#             -p|--prune)     p=1 ; shift ;;
+#             -b|--branch) 
+#                 if [ "$2" ]; then
+#                     b=$2
+#                 else
+#                     b=develop
+#                 fi ; shift 2 ;;
+#             -P|--path) 
+#                 if [ "$2" ]; then
+#                     WORKPATH=$2
+#                 else
+#                     WORKPATH=$(pwd)
+#                 fi ; shift 2 ;;
+#             -F|--fall) 
+#                 if [ "$2" ]; then
+#                     fall=$2
+#                 else
+#                     fall=develop
+#                 fi ; shift 2 ;;
+#             --) shift ; break ;;
+#             -*) echo "$0: error - unrecognized option '$1'" ; exit 1 ;;
+#     esac
+# done
+# end getopt(1)
+
+# list of repo
+if [ -f $DIR/repo_list ]; then
+    readarray REPO_LIST < $DIR/repo_list
+    [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] File read => repo_list" | tee -a $LOGFILE
+else
+    [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] No file found" | tee -a $LOGFILE
+    while true
+    do
+        read -p "-> list of repo not found, please enter file name : " file
+        [ ! -f $file ] && continue
+        readarray REPO_LIST < $file
+        [ $? -ne 0 ] && echo 'Invalid file, please try again' && continue
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] File read => $file" | tee -a $LOGFILE
+        break
+    done
+fi
+
+[ -z "$b" ] && b=develop
+[ -z "$fall" ] && fall=develop
+[ -z "$WORKPATH" ] && WORKPATH=$DIR
+[ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] Option => reset=$r prune=$p compare=$c branch=$b workpath=$WORKPATH fallback=$fall" | tee -a $LOGFILE
+
+# reset option confirmation
+if [ -z "$r" ]; then
+    [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] => no reset signal, stash unsaved work ..." | tee -a $LOGFILE
+else
+    while true
+    do
+        read -p "-> reset signal detected, are you sure to discard all unsaved work? (y or n) : " yn
+        case $yn in
+            [Yy]* ) break;;
+            [Nn]* ) exit;;
+            * ) echo "-> Please enter y or n"
+        esac
+    done
+fi
+
+stash_pop(){
+    if [ "$stash_msg" != "No local changes to save" ]; then
+        echo "$(date +%H:%M:%S) : [DEBUG] $1 => Stash pop" | tee -a $LOGFILE
+        git stash pop -q
+        [ $? -ne 0 ] && [ "$v" ] && echo "$(date +%H:%M:%S) : [ERROR] $1 => Stash pop failed" | tee -a $LOGFILE
+    fi
+}
+
+for REPO in ${REPO_LIST[@]}
+do
+    [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => git-update process start..." | tee -a $LOGFILE
+    cd $WORKPATH/$REPO
+    [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => in $PWD" | tee -a $LOGFILE
+    
+    # 1. stash unsaved work
+    if [ -z "$r" ]; then
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Stash work" | tee -a $LOGFILE
+        stash_msg=$(git stash)
+        [ "$stash_msg" == "No local changes to save" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => No changes to save" | tee -a $LOGFILE
+    fi
+
+    # 2. fetch all remote branches
+    if [ -z $p ]; then
+        git fetch -q --all
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Fetch all" | tee -a $LOGFILE
+    else
+        git fetch -qp --all
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Fetch all with prune" | tee -a $LOGFILE
+    fi
+    if [ $? -eq 0 ]; then
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Fetch success" | tee -a $LOGFILE
+    else
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [ERROR] $REPO => Fail to fetch, skip to next repo" | tee -a $LOGFILE
+        # FAIL_REPO+=($REPO)
+        [ -z "$r" ] && stash_pop $REPO
+        continue
+    fi
+
+    # 3.reset + update to develop
+    [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Update to $fall first" | tee -a $LOGFILE
+    git reset -q --hard
+    git checkout -q $fall
+    git rebase -q origin/$fall
+    if [ $? -eq 0 ]; then
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => On $fall and up-to-date" | tee -a $LOGFILE
+    else
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [ERROR] $REPO => Fail to rebase to origin/$fall, skip to next repo" | tee -a $LOGFILE
+        [ -z "$r" ] && stash_pop $REPO
+        continue
+    fi
+
+    # 4. checkout and update to branch
+    [ "$v" ] && [ "$b" != "$fall" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Checkout to $b" | tee -a $LOGFILE
+    [ "$b" != "$fall" ] && branch=$( git branch -a | grep $b -m 1 )
+    [ "$branch" ] && git checkout -q $(basename $branch)
+    if [ $? -eq 0 ] && [ "$b" != "$fall" ]; then
+
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Found $b, updating ..." | tee -a $LOGFILE
+        
+        git rebase -q origin/$(basename $branch)
+        if [ $? -ne 0 ]; then
+            echo "$(date +%H:%M:%S) : [ERROR] $REPO => Failed to update to $b, skip to next repo" | tee -a $LOGFILE
+            continue
+        fi
+
+        echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Successfully Updated to $b" | tee -a $LOGFILE
+
+    elif [ "$b" != "$fall" ]; then
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => $b not found, fallback to $fall" | tee -a $LOGFILE
+        git checkout -q $fall
+	    if [ $? -eq 0 ]; then
+	        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Now on $fall and up-to-date" | tee -a $LOGFILE
+	    else
+	        [ "$v" ] && echo "$(date +%H:%M:%S) : [ERROR] $REPO => Fail to rebase to origin/$fall, skip to next repo" | tee -a $LOGFILE
+	        [ -z "$r" ] && stash_pop $REPO
+	        continue
+	    fi
+        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Checkout to $fall" | tee -a $LOGFILE
+        
+    fi
+
+    # 5. Compare selected branch to fallback branch
+    if [ "$c" ]; then
+        git rev-list --left-right $b...$fall -- 2>/dev/null >/tmp/git_upstream_status_delta || continue
+        
+        LEFT_AHEAD=$(grep -c '^<' /tmp/git_upstream_status_delta)
+        RIGHT_AHEAD=$(grep -c '^>' /tmp/git_upstream_status_delta)
+        echo "$(date +%H:%M:%S) : [DEBUG] $REPO => $b (ahead $LEFT_AHEAD) | (behind $RIGHT_AHEAD) $fall" | tee -a $LOGFILE
+    fi
+
+    # 6. restore unsaved work
+    echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Go to next repo" | tee -a $LOGFILE
+    [ -z "$r" ] && stash_pop $REPO
+done
+
+echo "$(date +%H:%M:%S) : [DEBUG] Finished" | tee -a $LOGFILEs`
