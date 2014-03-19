@@ -10,6 +10,7 @@ to run ./git-update [-rvpb:P:f:][--branch: --fall:] [branch] [--path:] [workpath
 -v, --verbose   Print out all debug message
 -r, --reset     Unsaved work will be discard (prompt)
 -p, --prune     Remove all local branches with no remote branch
+-c, --compare   Compare ahead/behind to the fallback branch
 -b, --branch    Branch to go to; able to use part of the name, default is develop
 -P, --path      Set base working path
 -F, --fall      Fallback branch, default is develop
