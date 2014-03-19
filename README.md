@@ -6,7 +6,7 @@ A lazy way to update many git repositories at once
 Put git-update script with repo-list to the root path of your project
 then change the repo list to match your repo.
  
-to run ./git-update [-rvpb:P:f:][--branch: --fall:] [branch] [--path:] [workpath]
+to run ./git-update [-rvcpb:P:f:][--branch: --fall:] [branch] [--path:] [workpath]
 * -v, --verbose   Print out all debug message
 * -r, --reset     Unsaved work will be discard (prompt)
 * -p, --prune     Remove all local branches with no remote branch
@@ -15,7 +15,8 @@ to run ./git-update [-rvpb:P:f:][--branch: --fall:] [branch] [--path:] [workpath
 * -P, --path      Set base working path
 * -F, --fall      Fallback branch, default is develop
  
-e.g. ./git-update -vb SOK-308 -F develop
+ 
+    ./git-update -vb SOK-308 -F develop
  
 log file is store in /tmp/git-update_DATETIME.log
 **chmod is required to make git-update executable**
