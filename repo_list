@@ -1,5 +1,6 @@
 catalyst-model-net-search
 net-search
+net-search-bing
 net-search-google
 net-search-json
 net-search-loadbalancer
