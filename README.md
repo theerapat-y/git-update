@@ -1,5 +1,4 @@
 # git-update
-==========
 
 A lazy way to update many git repositories at once
 
@@ -9,6 +8,7 @@ then change the repo list to match your repo.
 ## How to run 
 
 ./git-update [-rvcpb:P:f:][--branch: --fall:] [branch] [--path:] [workpath]
+
 
 * -v, --verbose   Print out all debug message
 * -r, --reset     Unsaved work will be discard (prompt)
@@ -20,12 +20,13 @@ then change the repo list to match your repo.
  
 `./git-update -vb feature-01 -F develop`
 
-## Log
-
-log file is store in /tmp/git-update_DATETIME.log
 **chmod is required to make git-update executable**
+
+### Log
+
+Log file is store in /tmp/git-update_DATETIME.log.
  
-### For Mac OS X users
+## For Mac OS X users
 readarray is not available on bash 3.2 on OS X
 to use this script, please install bash 4.2 (via homebrew) by following these steps
 
@@ -37,3 +38,17 @@ $ sudo ln -s /usr/local/Cellar/bash/4.2.xx/bin/bash /bin/bash (replace xx with s
 ```
 
 then restart terminal
+
+## Alias
+Shell alias is recommended to make git-update easy for everyday use.
+
+Bash alias can be set in ~/.bashrc (or ~/.bash_profile in OS X)
+
+See more about Bash alias [here](http://tldp.org/LDP/abs/html/aliases.html).
+
+```
+alias update='$HOME/work/git-update/git-update -v'
+alias gomaster='$HOME/work/git-update/git-update -vb master'
+```
+
+bash restart is required after .bashrc update.
