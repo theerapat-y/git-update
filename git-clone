@@ -31,7 +31,6 @@ do
 done
 # end getopts
 
-[ -z "$UPDATETO" ] && UPDATETO=develop
 [ -z "$TARGETDIR" ] && TARGETDIR=$HOME/src/startsiden
 [ -z "$USER" ] && USER=startsiden
 
