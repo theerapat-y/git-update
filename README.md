@@ -54,6 +54,7 @@ alias gomaster='$HOME/work/git-update/git-update -vb master'
 ```
 
 bash restart is required after .bashrc update.
+You can run `source ~/.bashrc` to reload it without restarting terminal.
 
 ## git-clone
 
