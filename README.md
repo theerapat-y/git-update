@@ -10,15 +10,17 @@ then change the repo list to match your repo.
 ./git-update [-rvcpb:P:f:][--branch: --fall:] [branch] [--path:] [workpath]
 
 
-* -v, --verbose   Print out all debug message
+* -v, --verbose   Y'all know what it's for :)
 * -r, --reset     Unsaved work will be discard (prompt)
 * -p, --prune     Remove all local branches with no remote branch
-* -c, --compare   Compare ahead/behind to the fallback branch
-* -b, --branch    Branch to go to; able to use part of the name, default is develop
+* -c, --compare   Compare ahead/behind to the fallback branch (still in beta)
+* -b, --branch    Target branch to checkout to; able to use part of the name, default is develop
 * -P, --path      Set base working path
 * -F, --fall      Fallback branch, default is develop
  
-`./git-update -vb feature-01 -F develop`
+```
+./git-update -vb feature-01 -F develop
+```
 
 **chmod is required to make git-update executable**
 
@@ -52,3 +54,17 @@ alias gomaster='$HOME/work/git-update/git-update -vb master'
 ```
 
 bash restart is required after .bashrc update.
+
+## git-clone
+
+Companion to the git-update script
+
+Let you clone many repos from what's in repo_list with one command.
+
+* -v 			Verbose
+* -d 			Target directory, default is $HOME/src/startsiden
+* -u 			Run git-update after finish repo cloning, branch name required as args
+
+```
+./git-clone -vd "$HOME/work"
+```
