@@ -160,32 +160,46 @@ do
 
     # 4. checkout and update to branch
     [ "$v" ] && [ "$b" != "$fall" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Checkout to $b" | tee -a $LOGFILE
-    [ "$b" != "$fall" ] && branch=$( git branch -a | grep $b -m 1 )
-    [ "$branch" ] && git checkout -q $(basename $branch)
-    if [ $? -eq 0 ] && [ "$b" != "$fall" ]; then
+    [ "$b" != "$fall" ] && branch=$( git branch -a | grep -i $b -m 1 )
+    if [ "$branch" ]; then 
+        bname=$( basename $branch );
+        bdir=$( basename ${branch%$bname});
 
-        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Found $b, updating ..." | tee -a $LOGFILE
-        
-        git rebase -q origin/$(basename $branch)
-        if [ $? -ne 0 ]; then
-            echo "$(date +%H:%M:%S) : [ERROR] $REPO => Failed to update to $b, skip to next repo" | tee -a $LOGFILE
-            continue
+        if [ "$bdir" == "task" ] || [ "$bdir" == "feature" ]; then
+            git checkout -q $bdir/$bname
+        else
+            git checkout -q $bname
         fi
 
-        echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Successfully Updated to $b" | tee -a $LOGFILE
+        if [ $? -eq 0 ] && [ "$b" != "$fall" ]; then
 
-    elif [ "$b" != "$fall" ]; then
-        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => $b not found, fallback to $fall" | tee -a $LOGFILE
-        git checkout -q $fall
-	    if [ $? -eq 0 ]; then
-	        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Now on $fall and up-to-date" | tee -a $LOGFILE
-	    else
-	        [ "$v" ] && echo "$(date +%H:%M:%S) : [ERROR] $REPO => Fail to rebase to origin/$fall, skip to next repo" | tee -a $LOGFILE
-	        [ -z "$r" ] && stash_pop $REPO
-	        continue
-	    fi
-        [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Checkout to $fall" | tee -a $LOGFILE
-        
+            [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Found $b, updating ..." | tee -a $LOGFILE
+             
+            if [ "$bdir" == "task" ] || [ "$bdir" == "feature" ]; then
+                git rebase -q origin/$bdir/$bname
+            else
+                git rebase -q origin/$bname
+            fi
+            
+            if [ $? -ne 0 ]; then
+                echo "$(date +%H:%M:%S) : [ERROR] $REPO => Failed to update to $b, skip to next repo" | tee -a $LOGFILE
+                continue
+            fi
+
+            echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Successfully Updated to $b" | tee -a $LOGFILE
+
+        elif [ "$b" != "$fall" ]; then
+            [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => $b not found, fallback to $fall" | tee -a $LOGFILE
+            git checkout -q $fall
+	        if [ $? -eq 0 ]; then
+	            [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Now on $fall and up-to-date" | tee -a $LOGFILE
+	        else
+	            [ "$v" ] && echo "$(date +%H:%M:%S) : [ERROR] $REPO => Fail to rebase to origin/$fall, skip to next repo" | tee -a $LOGFILE
+	            [ -z "$r" ] && stash_pop $REPO
+	            continue
+	        fi
+            [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Checkout to $fall" | tee -a $LOGFILE
+        fi
     fi
 
     # 5. Compare selected branch to fallback branch
