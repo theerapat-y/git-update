@@ -175,7 +175,7 @@ do
 
             [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] $REPO => Found $b, updating ..." | tee -a $LOGFILE
              
-            if [ "$bdir" == "task" ] || [ "$bdir" == "feature" ]; then
+            if [ "$bdir" == "task" ] || [ "$bdir" == "feature" ] || [ "$bdir" == "bug" ]; then
                 git rebase -q origin/$bdir/$bname
             else
                 git rebase -q origin/$bname
