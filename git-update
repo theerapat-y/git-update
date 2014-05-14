@@ -165,7 +165,7 @@ do
         bname=$( basename $branch );
         bdir=$( basename ${branch%$bname});
 
-        if [ "$bdir" == "task" ] || [ "$bdir" == "feature" ]; then
+        if [ "$bdir" == "task" ] || [ "$bdir" == "feature" ] || [ "$bdir" == "bug" ]; then
             git checkout -q $bdir/$bname
         else
             git checkout -q $bname
