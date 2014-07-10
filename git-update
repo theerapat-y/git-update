@@ -15,10 +15,10 @@ echo "$(date +%H:%M:%S) : [DEBUG] Starting git-update" | tee -a $LOGFILE
 
 
 # declare -a FAIL_REPO SUCCESS_REPO DEV_REPO
-declare r v c p b WORKPATH fall
+declare r v c p b WORKPATH fall repo
 
 # getopts for Mac OS X without long options
-set -- $(getopt rvcpb:P:F: $*)
+set -- $(getopt rvcpb:P:F:R: $*)
 while [ $# -gt 0 ]
 do
     case "$1" in
@@ -29,6 +29,7 @@ do
     (-b) b="$2"; shift;;
     (-P) WORKPATH="$2"; shift;;
     (-F) fall="$2"; shift;;
+    (-R) repo="$2"; shift;;
     (--) shift; break;;
     (-*) echo "$0: error - unrecognized option '$1'" 1>&2; exit 1;;
     (*)  break;;
@@ -71,7 +72,10 @@ done
 # end getopt(1)
 
 # list of repo
-if [ -f $DIR/repo_list ]; then
+if [ "$repo" ]; then
+    REPO_LIST=()
+    REPO_LIST+=$repo
+elif [ -f $DIR/repo_list ]; then
     readarray REPO_LIST < $DIR/repo_list
     [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] File read => repo_list" | tee -a $LOGFILE
 else
@@ -90,7 +94,8 @@ fi
 [ -z "$b" ] && b=develop
 [ -z "$fall" ] && fall=develop
 [ -z "$WORKPATH" ] && WORKPATH=$DIR/..
-[ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] Option => reset=$r prune=$p compare=$c branch=$b workpath=$WORKPATH fallback=$fall" | tee -a $LOGFILE
+[ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] Option => reset=$r prune=$p compare=$c" | tee -a $LOGFILE
+[ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] Option => branch=$b workpath=$WORKPATH fallback=$fall repo=$repo" | tee -a $LOGFILE
 
 # reset option confirmation
 if [ -z "$r" ]; then
