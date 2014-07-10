@@ -94,8 +94,8 @@ fi
 [ -z "$b" ] && b=develop
 [ -z "$fall" ] && fall=develop
 [ -z "$WORKPATH" ] && WORKPATH=$DIR/..
-[ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] Option => reset=$r prune=$p compare=$c" | tee -a $LOGFILE
-[ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] Option => branch=$b workpath=$WORKPATH fallback=$fall repo=$repo" | tee -a $LOGFILE
+[ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] Option => reset=$r prune=$p compare=$c branch=$b"  | tee -a $LOGFILE
+[ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] Option => workpath=$WORKPATH fallback=$fall repo=$repo" | tee -a $LOGFILE
 
 # reset option confirmation
 if [ -z "$r" ]; then
