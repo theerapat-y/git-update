@@ -76,7 +76,11 @@ if [ "$repo" ]; then
     REPO_LIST=()
     REPO_LIST+=$repo
 elif [ -f $DIR/repo_list ]; then
-    readarray REPO_LIST < $DIR/repo_list
+    let i=0
+    while IFS=$'\n' read -r line_data; do
+        REPO_LIST[i]="${line_data}"
+        ((++i))
+    done < $DIR/repo_list
     [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] File read => repo_list" | tee -a $LOGFILE
 else
     [ "$v" ] && echo "$(date +%H:%M:%S) : [DEBUG] No file found" | tee -a $LOGFILE
