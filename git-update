@@ -38,39 +38,6 @@ do
 done
 # end getopts
 
-# getopt(1) for Linux with long options
-# TEMP=`getopt -o rvcpb:P:F: --long reset,verbose,compare,prune,branch:,path:,fall: -n 'git-update' -- "$@"`
-# eval set -- "$TEMP"
-# while [ $# -gt 0 ]; do
-#     case "$1" in
-#             -r|--reset)     r=1 ; shift ;;
-#             -v|--verbose)   v=1 ; shift ;;
-#             -c|--compare)   c=1 ; shift ;;
-#             -p|--prune)     p=1 ; shift ;;
-#             -b|--branch) 
-#                 if [ "$2" ]; then
-#                     b=$2
-#                 else
-#                     b=develop
-#                 fi ; shift 2 ;;
-#             -P|--path) 
-#                 if [ "$2" ]; then
-#                     WORKPATH=$2
-#                 else
-#                     WORKPATH=$(pwd)
-#                 fi ; shift 2 ;;
-#             -F|--fall) 
-#                 if [ "$2" ]; then
-#                     fall=$2
-#                 else
-#                     fall=develop
-#                 fi ; shift 2 ;;
-#             --) shift ; break ;;
-#             -*) echo "$0: error - unrecognized option '$1'" ; exit 1 ;;
-#     esac
-# done
-# end getopt(1)
-
 # list of repo
 if [ "$repo" ]; then
     REPO_LIST=()
